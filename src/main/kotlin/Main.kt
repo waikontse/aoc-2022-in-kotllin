@@ -1,3 +1,7 @@
+import week1.RockScissorPaper
+
 fun main() {
-    println("Hello world")
+    val puzzle = RockScissorPaper()
+    println(puzzle.solveFirstPart())
+    println(puzzle.solveSecondPart())
 }
