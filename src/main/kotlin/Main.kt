@@ -1,7 +1,7 @@
-import week1.Rucksack
+import week1.SupplyStacks
 
 fun main() {
-    val puzzle = Rucksack()
+    val puzzle = SupplyStacks()
     println(puzzle.solveFirstPart())
     println(puzzle.solveSecondPart())
 }
