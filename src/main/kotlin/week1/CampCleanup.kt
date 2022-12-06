@@ -2,26 +2,21 @@ package week1
 
 import shared.Day
 import shared.Puzzle
-import shared.ReadUtils.Companion.readPuzzleInput
-import java.lang.IllegalArgumentException
 
 @Day(4)
-class CampCleanup : Puzzle {
-    private val exampleInput = readPuzzleInput("day4_example.txt")
-    private val puzzleInput = readPuzzleInput("day4.txt")
+class CampCleanup : Puzzle(4) {
     private val lineRegex = """(\d+)-(\d+),(\d+)-(\d+)""".toRegex()
-
 
     override fun solveFirstPart(): Any {
         return puzzleInput.map { parseLine(it) }
             .map { it.sortedBy { section -> section.size } }
-            .count { (it[0] - it[1]).isEmpty()}
+            .count { (it[0] - it[1]).isEmpty() }
     }
 
     override fun solveSecondPart(): Any {
         return puzzleInput
             .map { parseLine(it) }
-            .count { (it[0] - it[1]).size < it[0].size}
+            .count { (it[0] - it[1]).size < it[0].size }
     }
 
     private fun parseLine(sections: String): List<Set<Int>> {
@@ -35,5 +30,5 @@ class CampCleanup : Puzzle {
         )
     }
 
-    private fun Pair<Int,Int>.toSections() = (this.first..this.second).toSet()
+    private fun Pair<Int, Int>.toSections() = (this.first..this.second).toSet()
 }

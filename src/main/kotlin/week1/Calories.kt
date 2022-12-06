@@ -2,19 +2,21 @@ package week1
 
 import shared.Day
 import shared.Puzzle
-import shared.ReadUtils.Companion.readPuzzleInput
 
 private const val SEPARATOR = ","
 
 @Day(1)
-class Calories : Puzzle {
-    private var lines: List<String> = readPuzzleInput("day1.txt")
+class Calories : Puzzle(1) {
+
+    override fun solveFirstPart() = puzzleInput
         .joinToString(SEPARATOR)
         .split("$SEPARATOR$SEPARATOR")
+        .maxOfOrNull { sumAllNumbers(it) }!!
 
-    override fun solveFirstPart() = lines.maxOfOrNull { sumAllNumbers(it) }!!
-
-    override fun solveSecondPart() = lines.map { sumAllNumbers(it) }
+    override fun solveSecondPart() = puzzleInput
+        .joinToString(SEPARATOR)
+        .split("$SEPARATOR$SEPARATOR")
+        .map { sumAllNumbers(it) }
         .sortedDescending()
         .take(3)
         .sum()

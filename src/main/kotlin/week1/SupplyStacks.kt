@@ -1,16 +1,8 @@
 package week1
 
-import shared.Day
 import shared.Puzzle
-import shared.ReadUtils.Companion.readPuzzleInput
-import java.lang.IllegalArgumentException
 
-@Day(5)
-class SupplyStacks : Puzzle {
-    private val exampleInput = readPuzzleInput("day5_example.txt")
-    private val puzzleInput = readPuzzleInput("day5.txt")
-
-
+class SupplyStacks : Puzzle(5) {
     override fun solveFirstPart(): Any {
         exampleInput
             .let { splitSections(it) }
@@ -28,12 +20,12 @@ class SupplyStacks : Puzzle {
 
         return listOf(
             puzzleInput.subList(0, indexSplit - 1),
-            puzzleInput.subList(indexSplit-1, indexSplit),
-            puzzleInput.subList(indexSplit+1, puzzleInput.size)
+            puzzleInput.subList(indexSplit - 1, indexSplit),
+            puzzleInput.subList(indexSplit + 1, puzzleInput.size)
         )
     }
 
-    private fun parseMove(move: String) : List<Int> {
+    private fun parseMove(move: String): List<Int> {
         // move 1 from 2 to 1
         val (count, from, to) = """move (\d+) from (\d+) to (\d+)""".toRegex()
             .matchEntire(move)

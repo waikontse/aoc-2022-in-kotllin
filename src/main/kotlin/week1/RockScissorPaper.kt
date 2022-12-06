@@ -2,12 +2,9 @@ package week1
 
 import shared.Day
 import shared.Puzzle
-import shared.ReadUtils.Companion.readPuzzleInput
 
 @Day(2)
-class RockScissorPaper : Puzzle {
-    private val exampleInput = readPuzzleInput("day2_example.txt")
-    private val puzzleInput = readPuzzleInput("day2.txt")
+class RockScissorPaper : Puzzle(2) {
     private val scoreMapperPart1: Map<String, Int> = mapOf(
         "A X" to 4,
         "A Y" to 8,

@@ -1,14 +1,8 @@
 package week1
 
-import shared.Day
 import shared.Puzzle
-import shared.ReadUtils.Companion.readPuzzleInput
 
-@Day(3)
-class Rucksack : Puzzle {
-    private val exampleInput = readPuzzleInput("day3_example.txt")
-    private val puzzleInput = readPuzzleInput("day3.txt")
-
+class Rucksack : Puzzle(3) {
     override fun solveFirstPart(): Any {
         return puzzleInput
             .map { splitRucksack(it) }
