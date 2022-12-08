@@ -1,7 +1,7 @@
-import week1.CommunicationDevice
+import week1.DiskDrive
 
 fun main() {
-    val puzzle = CommunicationDevice()
+    val puzzle = DiskDrive()
     println(puzzle.solveFirstPart())
     println(puzzle.solveSecondPart())
 }

@@ -26,7 +26,6 @@ class SupplyStacks : Puzzle(5) {
     }
 
     private fun parseMove(move: String): List<Int> {
-        // move 1 from 2 to 1
         val (count, from, to) = """move (\d+) from (\d+) to (\d+)""".toRegex()
             .matchEntire(move)
             ?.destructured
