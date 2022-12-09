@@ -18,5 +18,7 @@ class ReadUtils {
 
             return printNodes(acc.drop(1).plus(acc.first().nodes))
         }
+
+        fun String.toIntList() = this.toCharArray().map { it.digitToInt() }
     }
 }
