@@ -20,5 +20,23 @@ class ReadUtils {
         }
 
         fun String.toIntList() = this.toCharArray().map { it.digitToInt() }
+
+        fun List<List<Int>>.transpose(): List<List<Int>> {
+            val numberOfRows = this.size
+            val numberOfElements = this[0].size
+
+            val transposedList = mutableListOf<List<Int>>()
+            var transposedCol = mutableListOf<Int>()
+
+            for (i in 0..numberOfElements-1) {
+                for (j in 0..numberOfRows-1) {
+                    transposedCol.add(this[j][i])
+                }
+                transposedList.add(transposedCol)
+                transposedCol = mutableListOf()
+            }
+
+            return transposedList
+        }
     }
 }
