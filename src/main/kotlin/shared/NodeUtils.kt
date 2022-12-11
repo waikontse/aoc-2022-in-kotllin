@@ -1,4 +1,4 @@
 package shared
 
-class NodeUtilsh {
+class NodeUtils {
 }
