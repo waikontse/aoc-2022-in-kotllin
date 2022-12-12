@@ -1,8 +1,7 @@
-import week1.DiskDrive
-import week2.TreeHouse
+import week2.CathodeRayTube
 
 fun main() {
-    val puzzle = TreeHouse()
+    val puzzle = CathodeRayTube()
     println(puzzle.solveFirstPart())
     println(puzzle.solveSecondPart())
 }
