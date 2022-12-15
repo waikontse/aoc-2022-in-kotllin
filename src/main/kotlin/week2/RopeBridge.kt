@@ -4,8 +4,7 @@ import shared.Puzzle
 import kotlin.math.abs
 
 data class Positions(
-    var hPosition: Pair<Int, Int> = 0 to 0,
-    var tPosition: Pair<Int, Int> = 0 to 0,
+    var ropePosition: MutableList<Pair<Int, Int>> = MutableList(10) { 0 to 0 },
     val tVisitedPositions: MutableSet<Pair<Int, Int>> = mutableSetOf(0 to 0)
 )
 
@@ -13,97 +12,103 @@ class RopeBridge: Puzzle(9) {
     override fun solveFirstPart(): Any {
         val positions = Positions()
         puzzleInput.map { splitMoveCommand(it) }
-            .forEach { moveH(it.first, it.second, positions) }
-
-        //println(positions)
+            .forEach { moveH(it.first, it.second, positions, 1) }
 
         return positions.tVisitedPositions.count()
     }
 
     override fun solveSecondPart(): Any {
-        TODO("Not yet implemented")
+        val positions = Positions()
+        puzzleInput.map { splitMoveCommand(it) }
+            .forEach { moveH(it.first, it.second, positions, 9) }
+
+        return positions.tVisitedPositions.count()
     }
 
     private fun splitMoveCommand(command: String): Pair<String, Int> {
-        val spllitedCommand =  command.split(" ")
+        val splitCommand =  command.split(" ")
 
-        return spllitedCommand[0] to spllitedCommand[1].toInt()
+        return splitCommand[0] to splitCommand[1].toInt()
     }
 
-    private fun moveH(direction: String, steps: Int, positions: Positions) {
+    private fun moveH(direction: String, steps: Int, positions: Positions, ropeLength: Int) {
         if (steps == 0) {
             return
         }
 
         when (direction) {
-            "R" -> positions.hPosition = positions.hPosition.copy(first = positions.hPosition.first.inc())
-            "L" -> positions.hPosition = positions.hPosition.copy(first = positions.hPosition.first.dec())
-            "U" -> positions.hPosition = positions.hPosition.copy(second = positions.hPosition.second.inc())
-            "D" -> positions.hPosition = positions.hPosition.copy(second = positions.hPosition.second.dec())
+            "R" -> positions.ropePosition[0] = positions.ropePosition[0].copy(first = positions.ropePosition[0].first.inc())
+            "L" -> positions.ropePosition[0] = positions.ropePosition[0].copy(first = positions.ropePosition[0].first.dec())
+            "U" -> positions.ropePosition[0] = positions.ropePosition[0].copy(second = positions.ropePosition[0].second.inc())
+            "D" -> positions.ropePosition[0] = positions.ropePosition[0].copy(second = positions.ropePosition[0].second.dec())
         }
 
-        if (!isTTouching(positions)) {
-            println("is not touching")
-            moveTCloser(positions)
-
-            println(positions)
+        for (i in 1..ropeLength) {
+            if (!isTTouching(positions, i)) {
+                moveTCloser(positions, i, ropeLength)
+            }
         }
 
-        moveH(direction, steps.dec(), positions)
+        moveH(direction, steps.dec(), positions, ropeLength)
     }
 
-    private fun isTTouching(positions: Positions): Boolean {
-        val isTouchingHorizontal = abs(positions.hPosition.first - positions.tPosition.first)
-        val isTouchingVertical = abs(positions.hPosition.second - positions.tPosition.second)
+    private fun isTTouching(positions: Positions, tailPosition: Int): Boolean {
+        val isTouchingHorizontal = abs(positions.ropePosition[tailPosition.dec()].first - positions.ropePosition[tailPosition].first)
+        val isTouchingVertical = abs(positions.ropePosition[tailPosition.dec()].second - positions.ropePosition[tailPosition].second)
 
 
      return ((isTouchingHorizontal == 0) || (isTouchingHorizontal == 1)) &&
              ((isTouchingVertical == 0) ||  (isTouchingVertical == 1))
     }
 
-    private fun moveTCloser(positions: Positions) {
+    private fun moveTCloser(positions: Positions, tailPosition: Int, lastTail: Int) {
         with (positions) {
+            val previousRope = ropePosition[tailPosition.dec()]
+            val currentRope = ropePosition[tailPosition]
+
             // move left
-            if (hPosition.second == tPosition.second && hPosition.first < tPosition.first) {
-                tPosition = tPosition.copy(first = tPosition.first.dec())
+            if (previousRope.second == currentRope.second && previousRope.first < currentRope.first) {
+                ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.dec())
             }
 
             //move right
-            else if (hPosition.second == tPosition.second && hPosition.first > tPosition.first) {
-                tPosition = tPosition.copy(first = tPosition.first.inc())
+            else if (previousRope.second == currentRope.second && previousRope.first > currentRope.first) {
+                ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.inc())
             }
 
             // move up
-            else if (hPosition.first == tPosition.first && hPosition.second > tPosition.second) {
-                tPosition = tPosition.copy(second = tPosition.second.inc())
+            else if (previousRope.first == currentRope.first && previousRope.second > currentRope.second) {
+                ropePosition[tailPosition] = currentRope.copy(second = currentRope.second.inc())
             }
 
             // move down
-            else if (hPosition.first == tPosition.first && hPosition.second < tPosition.second) {
-                tPosition = tPosition.copy(second = tPosition.second.dec())
+            else if (previousRope.first == currentRope.first && previousRope.second < currentRope.second) {
+                ropePosition[tailPosition] = currentRope.copy(second = currentRope.second.dec())
             }
 
             // move upper-left
-            else if (hPosition.first < tPosition.first && hPosition.second > tPosition.second) {
-                tPosition = tPosition.copy(first = tPosition.first.dec(), second = tPosition.second.inc())
+            else if (previousRope.first < currentRope.first && previousRope.second > currentRope.second) {
+                ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.dec(), second = currentRope.second.inc())
             }
 
             // move upper-right
-            else if (hPosition.first > tPosition.first && hPosition.second > tPosition.second) {
-                tPosition = tPosition.copy(first = tPosition.first.inc(), second = tPosition.second.inc())
+            else if (previousRope.first > currentRope.first && previousRope.second > currentRope.second) {
+                ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.inc(), second = currentRope.second.inc())
             }
 
             // move lower-left
-            else if (hPosition.first < tPosition.first && hPosition.second < tPosition.second) {
-                tPosition = tPosition.copy(first = tPosition.first.dec(), second = tPosition.second.dec())
+            else if (previousRope.first < currentRope.first && previousRope.second < currentRope.second) {
+                ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.dec(), second = currentRope.second.dec())
             }
 
             // move lower right
-            else if (hPosition.first > tPosition.first && hPosition.second < tPosition.second) {
-                tPosition = tPosition.copy(first = tPosition.first.inc(), second = tPosition.second.dec())
+            else if (previousRope.first > currentRope.first && previousRope.second < currentRope.second) {
+                ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.inc(), second = currentRope.second.dec())
             }
         }
 
-        positions.tVisitedPositions.add(positions.tPosition)
+        if (tailPosition == lastTail) {
+            positions.tVisitedPositions.add(positions.ropePosition[tailPosition])
+        }
     }
 }
