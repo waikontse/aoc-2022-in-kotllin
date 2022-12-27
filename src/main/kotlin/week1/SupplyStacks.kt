@@ -7,11 +7,11 @@ class SupplyStacks : Puzzle(5) {
         val sections = splitSections(puzzleInput)
 
         val startStacks = sections[0].map { parseStack(it) }
-            .map { it.filter { pair -> pair.second != ' '} }
+            .map { it.filter { pair -> pair.second != ' ' } }
             .let { createStacks(it) }
 
         sections[2].map { parseMove(it) }
-            .forEach { moveStacks(it[0], it[1], it[2], { chars -> chars.reversed() } , startStacks) }
+            .forEach { moveStacks(it[0], it[1], it[2], { chars -> chars.reversed() }, startStacks) }
 
         return startStacks.filter { it.isNotEmpty() }
             .map { it.last() }
@@ -22,12 +22,11 @@ class SupplyStacks : Puzzle(5) {
         val sections = splitSections(puzzleInput)
 
         val startStacks = sections[0].map { parseStack(it) }
-            .map { it.filter { pair -> pair.second != ' '} }
+            .map { it.filter { pair -> pair.second != ' ' } }
             .let { createStacks(it) }
 
-
         sections[2].map { parseMove(it) }
-            .forEach { moveStacks(it[0], it[1], it[2], { chars -> chars } , startStacks) }
+            .forEach { moveStacks(it[0], it[1], it[2], { chars -> chars }, startStacks) }
 
         return startStacks.filter { it.isNotEmpty() }
             .map { it.last() }
@@ -50,7 +49,7 @@ class SupplyStacks : Puzzle(5) {
 
     private tailrec fun parseStackIndividual(
         acc: List<Pair<Int, Char>>,
-        row: String ,
+        row: String,
         currentPos: Int
     ): List<Pair<Int, Char>> {
         if (row.isEmpty()) {

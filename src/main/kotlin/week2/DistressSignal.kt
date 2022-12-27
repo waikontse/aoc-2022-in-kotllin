@@ -1,37 +1,39 @@
 package week2
 
 import shared.Puzzle
+import shared.ReadUtils.Companion.debug
 
-class DistressSignal: Puzzle(13) {
+class DistressSignal : Puzzle(13) {
     override fun solveFirstPart(): Any {
-        val cleanedInput = exampleInput.filter { it.isNotBlank() }
+        return puzzleInput.asSequence().filter { it.isNotBlank() }
             .chunked(2)
-            .map { it.joinToString(separator = " * ") }
-
-        val parsed = cleanedInput.map { it.split(" * ") }
             .map { parseEntry(it[0], 0) to parseEntry(it[1], 0) }
-
-        val comparedValue = compareValues(parsed[0].first, parsed[0].second, false, false)
-        println(comparedValue)
-
-//        val comparisonValues = parsed.map { compareValues(it.first, it.second, false, false) }
-//        val result = comparisonValues
-//            .mapIndexed { index, b -> if (b) index.inc() else -1 }
-//            .filter { it > 0 }
-//            .sum()
-//
-//        println(result)
-//        println(comparisonValues)
-
-        return 0
+            .map { compareValues(it.first, it.second) }
+            .mapIndexed { index, isInOrder -> if (isInOrder) index.inc() else -1 }
+            .filter { it > 0 }
+            .sum()
     }
 
     override fun solveSecondPart(): Any {
-        TODO("Not yet implemented")
+        val comparator = Comparator { left: List<*>, right: List<*> -> if (compareValues(left, right)) -1 else 1 }
+        val target1 = listOf(listOf(2))
+        val target2 = listOf(listOf(6))
+
+        puzzleInput.asSequence().filter { it.isNotBlank() }
+            .map { parseEntry(it, 0) }
+            .plus(target1)
+            .plus(target2)
+            .sortedWith(comparator).toList()
+            .let {
+                val index1 = it.indexOf(listOf(2)).inc()
+                val index2 = it.indexOf(listOf(6)).inc()
+
+                return index1 * index2
+            }
     }
 
     private fun parseEntry(entry: String, currPos: Int): List<Any> {
-        println("parsing $entry on pos: $currPos")
+        debug("parsing $entry on pos: $currPos")
 
         return if (entry[currPos] == '[') {
             parseList(entry, currPos.inc()).second
@@ -43,7 +45,7 @@ class DistressSignal: Puzzle(13) {
     }
 
     private fun parseList(entry: String, currPos: Int): Pair<Int, List<Any>> {
-        println("Parsing list $entry on currPos: $currPos")
+        debug("Parsing list $entry on currPos: $currPos")
 
         val newList = mutableListOf<Any>()
         var currPosTemp = currPos
@@ -53,9 +55,9 @@ class DistressSignal: Puzzle(13) {
                 val parsedList = parseList(entry, currPosTemp.inc())
                 newList.add(parsedList.second)
                 currPosTemp = parsedList.first
-                println("new currPosTemp: $currPosTemp")
+                debug("new currPosTemp: $currPosTemp")
             } else if (entry[currPosTemp] == ',') {
-                println("parsing comma")
+                debug("parsing comma")
                 currPosTemp += 1
             } else {
                 val parsedNumber = parseNumber(entry, currPosTemp)
@@ -68,7 +70,7 @@ class DistressSignal: Puzzle(13) {
     }
 
     private fun parseNumber(entry: String, currPos: Int): Pair<Int, Int> {
-        println("Parsing number: $entry currPos: $currPos")
+        debug("Parsing number: $entry currPos: $currPos")
 
         var currPosTemp = currPos
         while (entry[currPosTemp].isDigit()) {
@@ -80,36 +82,52 @@ class DistressSignal: Puzzle(13) {
         return currPosTemp to parsedInt
     }
 
-    private tailrec fun compareValues(left: List<*>, right: List<*>, isInOrder: Boolean, shouldStop: Boolean): Boolean {
-        println("Comparing values $left * $right ** isInOrder: $isInOrder ***  shouldStop: $shouldStop")
-        if (shouldStop) {
-            println("returning result == $isInOrder")
-            return isInOrder
-        } else if (left.isEmpty() && right.isNotEmpty()) {
-            return true
-        } else if (left.isNotEmpty() && right.isEmpty()) {
-            return isInOrder
-        } else if (left.isEmpty() && right.isEmpty()) {
-            println("return false for left.empty right.empty")
-            return isInOrder
-        }
+    private fun compareValues(left: List<*>, right: List<*>): Boolean {
+        return compareValues(left, right, isInOrder = false, shouldStop = false).first
+    }
 
+    private tailrec fun compareValues(
+        left: List<*>,
+        right: List<*>,
+        isInOrder: Boolean,
+        shouldStop: Boolean
+    ): Pair<Boolean, Boolean> {
+        debug("Comparing values $left * $right ** isInOrder: $isInOrder ***  shouldStop: $shouldStop")
+        if (isInOrder) {
+            return true to true
+        } else if (shouldStop) {
+            debug("returning result == $isInOrder")
+            return isInOrder to true
+        } else if (left.isEmpty() && right.isNotEmpty()) {
+            return true to true
+        } else if (left.isNotEmpty() && right.isEmpty()) {
+            return false to true
+        } else if (left.isEmpty() && right.isEmpty()) {
+            debug("return false for left.empty right.empty")
+            return isInOrder to shouldStop
+        }
 
         val leftFirst = left.first()
         val rightFirst = right.first()
-        var comparisonResult: Boolean = false
-        var shouldStopNew: Boolean = shouldStop
+        val comparisonResult: Boolean
+        val shouldStopNew: Boolean
 
         if (leftFirst is Int && rightFirst is Int) {
             val compareIntResult = compareInts(leftFirst, rightFirst)
             comparisonResult = compareIntResult.first
             shouldStopNew = compareIntResult.second
         } else if (leftFirst is List<*> && rightFirst is List<*>) {
-            comparisonResult = com(leftFirst, rightFirst)
+            val compareListResult = compareLists(leftFirst, rightFirst)
+            comparisonResult = compareListResult.first
+            shouldStopNew = compareListResult.second
         } else if (leftFirst is List<*> && rightFirst is Int) {
-            comparisonResult = compareLists(leftFirst, listOf(rightFirst))
+            val compareListResult = compareLists(leftFirst, listOf(rightFirst))
+            comparisonResult = compareListResult.first
+            shouldStopNew = compareListResult.second
         } else if (leftFirst is Int && rightFirst is List<*>) {
-            comparisonResult = compareLists(listOf(leftFirst), rightFirst)
+            val compareListResult = compareLists(listOf(leftFirst), rightFirst)
+            comparisonResult = compareListResult.first
+            shouldStopNew = compareListResult.second
         } else {
             throw IllegalArgumentException()
         }
@@ -118,14 +136,14 @@ class DistressSignal: Puzzle(13) {
     }
 
     private fun compareInts(left: Int, right: Int): Pair<Boolean, Boolean> {
-        println("Comparing ints: $left : $right")
+        debug("Comparing ints: $left : $right")
 
         return (left < right) to (left != right)
     }
 
-//    private fun compareLists(left: List<*>, right: List<*>): Boolean {
-//        println("Comparing lists: $left * $right")
-//
-//        return compareValues(left, right, false, false)
-//    }
+    private fun compareLists(left: List<*>, right: List<*>): Pair<Boolean, Boolean> {
+        debug("Comparing lists: $left * $right")
+
+        return compareValues(left, right, isInOrder = false, shouldStop = false)
+    }
 }

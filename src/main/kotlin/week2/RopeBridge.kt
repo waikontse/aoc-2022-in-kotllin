@@ -8,7 +8,7 @@ data class Positions(
     val tVisitedPositions: MutableSet<Pair<Int, Int>> = mutableSetOf(0 to 0)
 )
 
-class RopeBridge: Puzzle(9) {
+class RopeBridge : Puzzle(9) {
     override fun solveFirstPart(): Any {
         val positions = Positions()
         puzzleInput.map { splitMoveCommand(it) }
@@ -26,7 +26,7 @@ class RopeBridge: Puzzle(9) {
     }
 
     private fun splitMoveCommand(command: String): Pair<String, Int> {
-        val splitCommand =  command.split(" ")
+        val splitCommand = command.split(" ")
 
         return splitCommand[0] to splitCommand[1].toInt()
     }
@@ -56,13 +56,12 @@ class RopeBridge: Puzzle(9) {
         val isTouchingHorizontal = abs(positions.ropePosition[tailPosition.dec()].first - positions.ropePosition[tailPosition].first)
         val isTouchingVertical = abs(positions.ropePosition[tailPosition.dec()].second - positions.ropePosition[tailPosition].second)
 
-
-     return ((isTouchingHorizontal == 0) || (isTouchingHorizontal == 1)) &&
-             ((isTouchingVertical == 0) ||  (isTouchingVertical == 1))
+        return ((isTouchingHorizontal == 0) || (isTouchingHorizontal == 1)) &&
+                ((isTouchingVertical == 0) || (isTouchingVertical == 1))
     }
 
     private fun moveTCloser(positions: Positions, tailPosition: Int, lastTail: Int) {
-        with (positions) {
+        with(positions) {
             val previousRope = ropePosition[tailPosition.dec()]
             val currentRope = ropePosition[tailPosition]
 
@@ -71,7 +70,7 @@ class RopeBridge: Puzzle(9) {
                 ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.dec())
             }
 
-            //move right
+            // move right
             else if (previousRope.second == currentRope.second && previousRope.first > currentRope.first) {
                 ropePosition[tailPosition] = currentRope.copy(first = currentRope.first.inc())
             }

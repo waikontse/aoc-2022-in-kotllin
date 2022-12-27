@@ -2,6 +2,7 @@ package shared
 
 import week1.DiskDrive
 
+val debugOn = false
 class ReadUtils {
     companion object {
         fun readPuzzleInput(fileName: String) =
@@ -28,8 +29,8 @@ class ReadUtils {
             val transposedList = mutableListOf<List<Int>>()
             var transposedCol = mutableListOf<Int>()
 
-            for (i in 0..numberOfElements-1) {
-                for (j in 0..numberOfRows-1) {
+            for (i in 0 until numberOfElements) {
+                for (j in 0 until numberOfRows) {
                     transposedCol.add(this[j][i])
                 }
                 transposedList.add(transposedCol)
@@ -37,6 +38,12 @@ class ReadUtils {
             }
 
             return transposedList
+        }
+
+        fun debug(message: Any?) {
+            if (debugOn) {
+                println(message)
+            }
         }
     }
 }
