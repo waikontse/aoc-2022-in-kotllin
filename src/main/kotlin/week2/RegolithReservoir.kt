@@ -1,6 +1,8 @@
 package week2
 
 import shared.Puzzle
+import java.lang.Integer.max
+import java.lang.Integer.min
 
 typealias Point = Pair<Int, Int>
 typealias Cave = Array<CharArray>
@@ -82,8 +84,8 @@ class RegolithReservoir : Puzzle(14) {
     }
 
     fun drawVerticalLine(from: Point, to: Point, cave: Cave) {
-        val fromY = if (from.second < to.second) from.second else to.second
-        val toY = if (from.second < to.second) to.second else from.second
+        val fromY = min(from.second, to.second)
+        val toY = max(from.second, to.second)
 
         for (i in fromY .. toY) {
             cave[from.first][i] = '#'
@@ -91,12 +93,16 @@ class RegolithReservoir : Puzzle(14) {
     }
 
     fun drawHorizontalLine(from: Point, to: Point, cave: Cave) {
-        val fromX = if (from.first < to.first) from.first else to.first
-        val toX = if (from.first < to.first) to.first else from.first
+        val fromX = min(from.first, to.first)
+        val toX = max(from.first, to.first)
 
         for (i in fromX .. toX) {
             cave[i][from.second] = '#'
         }
+    }
+
+    fun simulateSanddrop(cave: Cave) {
+        TODO("implement me")
     }
 
     fun canGoLeft(): Boolean {
