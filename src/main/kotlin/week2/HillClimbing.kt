@@ -5,7 +5,7 @@ import shared.Algorithms.Companion.dijkstra
 import shared.Node
 import shared.Puzzle
 
-class HillClimbing: Puzzle(12) {
+class HillClimbing : Puzzle(12) {
     override fun solveFirstPart(): Any {
         val input = puzzleInput
         val cleanedInput = input.map { it.replace("S", "a") }
@@ -25,17 +25,12 @@ class HillClimbing: Puzzle(12) {
 
         val graph = parseMap(cleanedInput)
 
-
         return cleanedInput.joinToString("")
             .mapIndexed { index, c -> if (c == 'a') index else -1 }
             .filterNot { i -> i == -1 }
             .map { dijkstra(it, graph) }
             .map { it.first[findEndingPosition(input)] }
             .min()
-
-        //val shortestPaths = dijkstra(findStartingPosition(input), graph)
-
-        //return shortestPaths.first[findEndingPosition(input)]
     }
 
     private fun parseMap(map: List<String>): Graph {
@@ -51,8 +46,8 @@ class HillClimbing: Puzzle(12) {
         map: String,
         size: GraphSize,
         currPos: Node,
-        graph: Graph): Graph {
-
+        graph: Graph
+    ): Graph {
         if (currPos >= size.width * size.height) {
             return graph
         }
@@ -67,16 +62,16 @@ class HillClimbing: Puzzle(12) {
         val edges = mutableListOf<Edge>()
 
         if (isConnectedTop(map, size, currPos)) {
-            edges.add(Edge(currPos.minus(size.width),1))
+            edges.add(Edge(currPos.minus(size.width), 1))
         }
         if (isConnectedBottom(map, size, currPos)) {
-            edges.add(Edge(currPos.plus(size.width),1))
+            edges.add(Edge(currPos.plus(size.width), 1))
         }
         if (isConnectedLeft(map, size, currPos)) {
-            edges.add(Edge(currPos.dec(),1))
+            edges.add(Edge(currPos.dec(), 1))
         }
         if (isConnectedRight(map, size, currPos)) {
-            edges.add(Edge(currPos.inc(),1))
+            edges.add(Edge(currPos.inc(), 1))
         }
 
         return edges
@@ -124,4 +119,3 @@ class HillClimbing: Puzzle(12) {
         return findPositionOfChar(map, target, currPos.inc())
     }
 }
-

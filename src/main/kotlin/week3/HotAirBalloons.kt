@@ -41,7 +41,7 @@ class HotAirBalloons : Puzzle(25) {
         var carry = 0
 
         for (i in pental) {
-            val conversionResult = pentalToSnafu(i+carry)
+            val conversionResult = pentalToSnafu(i + carry)
             snafu.add(conversionResult.first)
             carry = conversionResult.second
 
@@ -63,18 +63,16 @@ class HotAirBalloons : Puzzle(25) {
             return acc
         }
 
-
         val multiplier = 5 pow level
         val snafuChar = snafu.first()
 
         debug("converting $snafu with multiplier $multiplier")
 
-
         return toDecimal2(snafu.drop(1), acc.plus(multiplier * snafuToDecimal(snafuChar)), level.inc())
     }
 
     private fun snafuToDecimal(snafu: Char) =
-        when(snafu) {
+        when (snafu) {
             '-' -> -1
             '=' -> -2
             '0' -> 0
@@ -84,7 +82,7 @@ class HotAirBalloons : Puzzle(25) {
         }
 
     private fun pentalToSnafu(pental: Int) =
-        when(pental) {
+        when (pental) {
             0 -> '0' to 0
             1 -> '1' to 0
             2 -> '2' to 0
