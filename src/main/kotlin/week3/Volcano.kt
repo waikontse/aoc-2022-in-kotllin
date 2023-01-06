@@ -1,14 +1,14 @@
 package week3
 
+import shared.AdjacencyMatrix
+import shared.Algorithms.Companion.floydWarshall
 import shared.Puzzle
 import shared.ReadUtils.Companion.debug
 import java.lang.Math.min
 
-typealias AdjacencyMatrix = Array<IntArray>
-
 class Volcano : Puzzle(16) {
     override fun solveFirstPart(): Any {
-        val cleanedLines = exampleInput
+        val cleanedLines = puzzleInput
             .map { it.replace("Valve ", "") }
             .map { StringBuilder(it) }
             .map { it.insert(2, ',') }
@@ -25,18 +25,37 @@ class Volcano : Puzzle(16) {
 
 
         println("generating connections ${caveInfosWithFlows.size}")
-        val comboSet = generateSet(caveInfosWithFlows.map { it.key }.toSet(), 4)
+        println(caveInfosWithFlows)
+        println("Average flows: ${caveInfosWithFlows.values.average()}")
+        caveInfosWithFlows.keys
+            .forEach { println("Distance to cave $it: ${adjacencyMatrix[translationMap["AA"]!!][translationMap[it]!!]}") }
+        val avgDist = caveInfosWithFlows.keys
+            .map { adjacencyMatrix[translationMap["AA"]!!][translationMap[it]!!] }
+            .average().toInt()
+        println("Avg distance: $avgDist")
+        val median = caveInfosWithFlows.keys
+            .map { adjacencyMatrix[translationMap["AA"]!!][translationMap[it]!!] }
+            .sorted()
+        println("Avg distance: $median")
+        val flow = caveInfosWithFlows.values.sorted()
+        println("Avg flow: $flow")
+
+        val ignoreForStartingCave = setOf("AM", "UI", "YK", "IH", "XN")
+
+        val comboSet = generateSet(caveInfosWithFlows.map { it.key }.toSet(), 6, 1, adjacencyMatrix,
+            translationMap, avgDist, ignoreForStartingCave)
         println(comboSet.size)
 
-        val bestRoute = calculateBestRouteForCave("AA", 30, adjacencyMatrix, translationMap, caveInfosWithFlows)
+        val bestRoute = calculateBestRouteForCave("AA", 26, adjacencyMatrix, translationMap,
+            caveInfosWithFlows, 6, avgDist, ignoreForStartingCave)
 
-        println(bestRoute)
+        println("Best route: $bestRoute")
 
         return bestRoute.second
     }
 
     override fun solveSecondPart(): Any {
-        val cleanedLines = exampleInput
+        val cleanedLines = puzzleInput
             .map { it.replace("Valve ", "") }
             .map { StringBuilder(it) }
             .map { it.insert(2, ',') }
@@ -52,15 +71,78 @@ class Volcano : Puzzle(16) {
 
         val adjacencyMatrix = floydWarshall(generateAdjacencyMatrix(cleanedLines, translationMap))
 
-        val bestRoute = calculateBestRouteForCave("AA", maxRunningMinutes, adjacencyMatrix, translationMap, caveInfosWithFlows)
 
-        println(bestRoute)
+//        val route = calculatePointsForRoute("AA", maxRunningMinutes, adjacencyMatrix, translationMap, caveInfosWithFlows,
+//            listOf("JJ", "BB", "CC"))
+//
+//        println(route)
+        val avgDist = caveInfosWithFlows.keys
+            .map { adjacencyMatrix[translationMap["AA"]!!][translationMap[it]!!] }
+            .average().toInt()
+        println("Avg distance: $avgDist")
+        val ignoreForStartingCave = setOf("CC", "EE")
 
-        return bestRoute.second
+        val bestRoutes = calculateBestRouteForCaveMulti("AA", maxRunningMinutes, adjacencyMatrix, translationMap,
+        caveInfosWithFlows, avgDist, ignoreForStartingCave)
+
+        println("Best routes: $bestRoutes")
+
+
+
+        //return bestRoute.second
+
+        return 0
     }
 
+    private fun calculateBestRouteForCaveMulti(
+        startingCave: String,
+        maxMinutes: Int,
+        adjacencyMatrix: AdjacencyMatrix,
+        translationMap: Map<String, Int>,
+        caveToFlowMap: Map<String, Int>,
+        avgDistance: Int,
+        ignoreForStartingCave: Set<String>
+    ): Pair<List<String>, Int> {
+        val maxSizeToGenerate = 8
+        val unopenedValves = caveToFlowMap.map { it.key }.toSet()
 
-    fun generateTranslationMap(lines: List<String>): Map<String, Int> {
+        // Generate the list of combinations with a limited size
+        // find the max of the generated list
+
+        // save the list
+        val comboSet = generateSet(unopenedValves, maxSizeToGenerate, 1, adjacencyMatrix, translationMap,
+            avgDistance, ignoreForStartingCave)
+        println("Size of set: ${comboSet.size}")
+        val bestRoute = comboSet
+            .map {
+                it to
+                        calculatePointsForRoute(
+                            startingCave,
+                            maxMinutes,
+                            adjacencyMatrix,
+                            translationMap,
+                            caveToFlowMap,
+                            it.subList(0, it.size/2)
+                        ).plus(
+                            calculatePointsForRoute(
+                                startingCave,
+                                maxMinutes,
+                                adjacencyMatrix,
+                                translationMap,
+                                caveToFlowMap,
+                                it.subList(it.size/2, it.size)
+                            )
+                        )
+            }.maxByOrNull { it.second }!!
+
+        // remember the last cave
+        // update the list of active caves
+        // generate the new list with new starting cave, range and active caves
+
+        return bestRoute
+    }
+
+    private fun generateTranslationMap(lines: List<String>): Map<String, Int> {
         val translationMap = mutableMapOf<String, Int>()
         var currentCount = 0
 
@@ -71,7 +153,7 @@ class Volcano : Puzzle(16) {
         return translationMap
     }
 
-    fun generateValveFlowList(caves: List<String>): Map<String, Int> {
+    private fun generateValveFlowList(caves: List<String>): Map<String, Int> {
         val caveInfo = mutableMapOf<String, Int>()
 
         for (cave in caves) {
@@ -107,23 +189,49 @@ class Volcano : Puzzle(16) {
 
     }
 
-    private fun floydWarshall(adjacencyMatrix: AdjacencyMatrix): AdjacencyMatrix {
-        val adjacencyMatrixAllPairs = adjacencyMatrix.clone()
-        val v = adjacencyMatrix.size
+    private fun calculateBestRouteForCave(
+        startingCave: String,
+        maxMinutes: Int,
+        adjacencyMatrix: AdjacencyMatrix,
+        translationMap: Map<String, Int>,
+        caveToFlowMap: Map<String, Int>,
+        maxSizeToGenerate: Int,
+        avgDistance: Int,
+        ignoreForStartingCave: Set<String>
+    ): Pair<List<String>, Int> {
+        var currentBestRoute = listOf<String>()
 
-        for (k in 0 until v) {
-            for (i in 0 until v) {
-                for (j in 0 until v) {
-                    adjacencyMatrixAllPairs[i][j] = Math.min(adjacencyMatrixAllPairs[i][j], adjacencyMatrixAllPairs[i][k] + adjacencyMatrixAllPairs[k][j])
-                }
-            }
-        }
+        // save the list
+        val comboSet = generateSet(caveToFlowMap.keys.toSet(), maxSizeToGenerate, 1,adjacencyMatrix, translationMap,
+            avgDistance, ignoreForStartingCave)
+        val bestRoute = comboSet.map {
+            it to calculatePointsForRoute(
+                startingCave,
+                maxMinutes,
+                adjacencyMatrix,
+                translationMap,
+                caveToFlowMap,
+                it
+            )
+        }.maxByOrNull { it.second }!!
+        currentBestRoute = currentBestRoute + bestRoute.first
 
-        return adjacencyMatrixAllPairs
+        return currentBestRoute to calculatePointsForRoute(startingCave, maxMinutes, adjacencyMatrix, translationMap, caveToFlowMap, currentBestRoute)
     }
 
-    private fun generateSet(initialSet: Set<String>, maxDepth: Int): List<List<String>> {
-        return generateSet(initialSet, 0, maxDepth, mutableListOf(), listOf())
+    private fun generateSet(initialSet: Set<String>,
+                            maxDepth: Int,
+                            adjacencyMatrix: AdjacencyMatrix,
+                            translationMap: Map<String, Int>,
+                            avgDistance: Int,
+                            ignoreForStartingCave: Set<String>
+    ): List<List<String>> {
+        val generatedSet = generateSet(initialSet, 0, maxDepth, mutableListOf(), listOf(), adjacencyMatrix,
+            translationMap, avgDistance, ignoreForStartingCave)
+
+        println("Generated set size ${generatedSet.size} for $initialSet")
+
+        return generatedSet
     }
 
     private fun generateSet(
@@ -131,7 +239,11 @@ class Volcano : Puzzle(16) {
         currentDepth: Int,
         maxDepth: Int,
         acc: MutableList<List<String>>,
-        currentCombo: List<String>
+        currentCombo: List<String>,
+        adjacencyMatrix: AdjacencyMatrix,
+        translationMap: Map<String, Int>,
+        avgDistance: Int,
+        ignoreForStartingCave: Set<String> // List of cave with flows not worth exploring when starting
     ): List<List<String>> {
         if (currentDepth == maxDepth) {
             acc.add(currentCombo)
@@ -140,50 +252,23 @@ class Volcano : Puzzle(16) {
         }
 
         for (str in currentSet) {
-            generateSet(currentSet.minus(str), currentDepth.inc(), maxDepth, acc, currentCombo.plus(str))
+            // Skip if distance is too great
+            val distanceFromStartingCave = adjacencyMatrix[translationMap["AA"]!!][translationMap[str]!!]
+            if ((distanceFromStartingCave > avgDistance) && currentDepth == 0) {
+                continue
+            }
+
+            // skip if cave is not worth exploring
+            if (currentDepth <= maxDepth/2 && ignoreForStartingCave.contains(str)) {
+                continue
+            }
+
+            generateSet(currentSet.minus(str), currentDepth.inc(), maxDepth, acc, currentCombo.plus(str),
+                adjacencyMatrix, translationMap, avgDistance, ignoreForStartingCave
+            )
         }
 
         return acc
-    }
-
-    private fun calculateBestRouteForCave(
-        startingCave: String,
-        maxMinutes: Int,
-        adjacencyMatrix: AdjacencyMatrix,
-        translationMap: Map<String, Int>,
-        caveToFlowMap: Map<String, Int>
-    ): Pair<List<String>, Int> {
-        var unopenedValvesCount = 6//caveToFlowMap.size
-        val maxSizeToGenerate = 6
-        var currentBestRoute = listOf<String>()
-        var currentLastCave = startingCave
-        val unopenedValves = caveToFlowMap.map { it.key }.toMutableSet()
-
-        while (unopenedValvesCount > 0) {
-            println("UnopenedValves count: $unopenedValvesCount")
-            println("UnopenedValves: $unopenedValves")
-
-            // Generate the list of combinations with a limited size
-            // find the max of the generated list
-
-            // save the list
-            val comboSet = generateSet(unopenedValves, maxSizeToGenerate.coerceAtMost(unopenedValvesCount))
-            val bestRoute = comboSet.map {
-                it to calculatePointsForRoute(currentLastCave, maxMinutes, adjacencyMatrix, translationMap, caveToFlowMap, it)
-            }.sortedByDescending { it.second }
-                .first()
-            currentBestRoute = currentBestRoute + bestRoute.first
-
-            // remember the last cave
-            // update the list of active caves
-            // generate the new list with new starting cave, range and active caves
-            currentLastCave = bestRoute.first.last()
-            unopenedValves.removeAll(bestRoute.first.toSet())
-            unopenedValvesCount -= maxSizeToGenerate
-
-        }
-
-        return currentBestRoute to calculatePointsForRoute(startingCave, maxMinutes, adjacencyMatrix, translationMap, caveToFlowMap, currentBestRoute)
     }
 
     private fun calculatePointsForRoute(
@@ -216,16 +301,13 @@ class Volcano : Puzzle(16) {
             currentCave = toCave
         }
 
-       // println("Total points for route: $route -> $accumulatedRoutePoints")
+       //println("Total points for route: $route -> $accumulatedRoutePoints")
 
         // safety check
         if (currentMinute > maxMinutes) {
             // throw IllegalArgumentException("Route calculation passed 30 minutes. $currentMinute")
             accumulatedRoutePoints = 0
         }
-
-        // println("Route calculation used $currentMinute minutes. score: $accumulatedRoutePoints")
-
 
         return accumulatedRoutePoints
     }

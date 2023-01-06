@@ -2,6 +2,9 @@ package shared
 
 import java.util.*
 
+typealias AdjacencyMatrix = Array<IntArray>
+typealias Node = Int
+
 class Algorithms {
     data class Edge(val endPoint: Node, val cost: Int)
     data class GraphSize(val width: Int, val height: Int)
@@ -29,6 +32,7 @@ class Algorithms {
     }
 
     companion object {
+
         fun dijkstra(firstNode: Node, graph: Graph): Pair<IntArray, Map<Node, Edge>> {
             val distances = IntArray(graph.verticesCount()) { if (it == firstNode) 0 else Int.MAX_VALUE }
             val visited = BooleanArray(graph.verticesCount()) { it == firstNode }
@@ -56,7 +60,25 @@ class Algorithms {
 
             return Pair(distances, pathMap)
         }
+
+        /**
+         * Floyd-Warshall algorithm. An all pairs shortest path algorithm.
+         * Slower than Dijkstra, but is very compact code.
+         * N (the number of nodes) should be <= 450 (According to competitive programming book ed. 4)
+         */
+        fun floydWarshall(adjacencyMatrix: AdjacencyMatrix): AdjacencyMatrix {
+            val adjacencyMatrixAllPairs = adjacencyMatrix.clone()
+            val v = adjacencyMatrix.size
+
+            for (k in 0 until v) {
+                for (i in 0 until v) {
+                    for (j in 0 until v) {
+                        adjacencyMatrixAllPairs[i][j] = Math.min(adjacencyMatrixAllPairs[i][j], adjacencyMatrixAllPairs[i][k] + adjacencyMatrixAllPairs[k][j])
+                    }
+                }
+            }
+
+            return adjacencyMatrixAllPairs
+        }
     }
 }
-
-typealias Node = Int

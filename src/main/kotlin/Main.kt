@@ -4,5 +4,5 @@ import week3.Volcano
 fun main() {
     val puzzle = Volcano()
     println(puzzle.solveFirstPart())
-    println(puzzle.solveSecondPart())
+//    println(puzzle.solveSecondPart())
 }
