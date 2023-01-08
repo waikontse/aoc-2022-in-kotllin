@@ -1,6 +1,5 @@
 package week3
 
-
 import shared.Puzzle
 import week2.Point
 import java.math.BigInteger
@@ -26,11 +25,11 @@ data class SensorBeacon(
         val manhattanDistanceDiff = abs(manhattanDistance - distanceToY)
         val numberOfXs = manhattanDistanceDiff * 2 + 1
 
-        return (sensorX-numberOfXs/2..sensorX+numberOfXs/2).toSet()
+        return (sensorX - numberOfXs / 2..sensorX + numberOfXs / 2).toSet()
     }
 
     fun pointIsInRange(point: Point): Boolean {
-        return (abs(sensorX-point.first) + abs(sensorY-point.second)) <= manhattanDistance
+        return (abs(sensorX - point.first) + abs(sensorY - point.second)) <= manhattanDistance
     }
 
     fun generatePerimeter(manhattanDistance: Int): Set<Point> {
@@ -40,15 +39,14 @@ data class SensorBeacon(
         for (i in 0..manhattanDistance) {
             // generate upper part
             // left
-            addPositivePoint(perimeterPoints, Point(sensorX - (manhattanDistance - i), sensorY-i))
+            addPositivePoint(perimeterPoints, Point(sensorX - (manhattanDistance - i), sensorY - i))
             // right
-            addPositivePoint(perimeterPoints, Point(sensorX + (manhattanDistance - i), sensorY-i))
-
+            addPositivePoint(perimeterPoints, Point(sensorX + (manhattanDistance - i), sensorY - i))
             // generate lower part
             // right
-            addPositivePoint(perimeterPoints, Point(sensorX - (manhattanDistance - i), sensorY+i))
+            addPositivePoint(perimeterPoints, Point(sensorX - (manhattanDistance - i), sensorY + i))
             // left
-            addPositivePoint(perimeterPoints, Point(sensorX + (manhattanDistance - i), sensorY+i))
+            addPositivePoint(perimeterPoints, Point(sensorX + (manhattanDistance - i), sensorY + i))
         }
 
         return perimeterPoints
@@ -96,7 +94,7 @@ class BeaconExclusion : Puzzle(15) {
             .map { it.generatePerimeter(it.manhattanDistance + 1) }
             .sortedByDescending { it.size }
 
-        var pointOfDistressSignal: Point = Point(0,0)
+        var pointOfDistressSignal: Point = Point(0, 0)
         var hasFoundDistressSignal = 0
         loopOuter@ for (points in allPerimetersPoints) {
             for (p in points) {
@@ -106,7 +104,7 @@ class BeaconExclusion : Puzzle(15) {
                     }
                 }
 
-                if(hasFoundDistressSignal == parsedSensorBeacon.size) {
+                if (hasFoundDistressSignal == parsedSensorBeacon.size) {
                     pointOfDistressSignal = p
                     break@loopOuter
                 }
@@ -115,12 +113,10 @@ class BeaconExclusion : Puzzle(15) {
             }
         }
 
-
         val multiplier = BigInteger.valueOf(4000000L)
 
         return pointOfDistressSignal.first.toBigInteger().multiply(multiplier).plus(pointOfDistressSignal.second.toBigInteger())
     }
-
 
     val sensorLineRegex = """Sensor at x=(\p{Graph}+), y=(\p{Graph}+): closest beacon is at x=(\p{Graph}+), y=(\p{Graph}+)""".toRegex()
     private fun parseSensorLine(rawPosition: String): SensorBeacon {

@@ -1,7 +1,9 @@
 package week2
 
-import shared.Algorithms.*
 import shared.Algorithms.Companion.dijkstra
+import shared.Algorithms.Edge
+import shared.Algorithms.Graph
+import shared.Algorithms.GraphSize
 import shared.Node
 import shared.Puzzle
 

@@ -32,7 +32,7 @@ class Volcano : Puzzle(16) {
             .map { adjacencyMatrix[translationMap["AA"]!!][translationMap[it]!!] }
             .average().toInt()
 
-        val bestRoute = calculateBestRouteForCave(volcanoConfig, maxDepth, avgDist*2)
+        val bestRoute = calculateBestRouteForCave(volcanoConfig, maxDepth, avgDist * 2)
 
         println("Best route: $bestRoute")
 
@@ -48,7 +48,7 @@ class Volcano : Puzzle(16) {
             .sorted()
 
         val translationMap = generateTranslationMap(cleanedLines)
-        val caveInfos = generateValveFlowList(cleanedLines).filter { it.value > 0}
+        val caveInfos = generateValveFlowList(cleanedLines).filter { it.value > 0 }
         val maxRunningMinutes = 26
         val maxDepth = 6
         val adjacencyMatrix = floydWarshall(generateAdjacencyMatrix(cleanedLines, translationMap))
@@ -57,7 +57,7 @@ class Volcano : Puzzle(16) {
             .map { adjacencyMatrix[translationMap["AA"]!!][translationMap[it]!!] }
             .average().toInt()
 
-        val comboSet = generateSet(caveInfos.map { it.key }.toSet(), maxDepth, volcanoConfig, avgDist*2)
+        val comboSet = generateSet(caveInfos.map { it.key }.toSet(), maxDepth, volcanoConfig, avgDist * 2)
         val prunedComboSet = getHighestUniqueRoutes(volcanoConfig, comboSet)
 
         // Calculate the best complementing route for each generated starting route
@@ -68,10 +68,10 @@ class Volcano : Puzzle(16) {
             .map {
                 val newCaveWithFlows = caveInfos - it.first.toSet()
                 val newVolcanoConfig = volcanoConfig.copy(caveToFlowMap = newCaveWithFlows)
-                val bestRoute = calculateBestRouteForCave(newVolcanoConfig, maxDepth-1, avgDist*2)
+                val bestRoute = calculateBestRouteForCave(newVolcanoConfig, maxDepth - 1, avgDist * 2)
 
                 it to bestRoute
-        }
+            }
 
         val bestestRoute = bestRoutes.maxBy { it.first.second + it.second.second }
         println("Bestest route: $bestestRoute: ${bestestRoute.first.second + bestestRoute.second.second}")
@@ -93,11 +93,10 @@ class Volcano : Puzzle(16) {
             .map { it.first.second }
     }
 
-
     private fun calculateBestRouteForCave(
         config: VolcanoConfig,
         maxSizeToGenerate: Int,
-        avgDistance: Int,
+        avgDistance: Int
     ): Pair<List<String>, Int> {
         val comboSet = generateSet(config.caveToFlowMap.keys.toSet(), maxSizeToGenerate, config, avgDistance)
         if (comboSet.isEmpty()) {
@@ -155,15 +154,14 @@ class Volcano : Puzzle(16) {
         }
 
         return adjacencyMatrix
-
     }
 
-    private fun generateSet(initialSet: Set<String>,
-                            maxDepth: Int,
-                            config: VolcanoConfig,
-                            avgDistance: Int
+    private fun generateSet(
+        initialSet: Set<String>,
+        maxDepth: Int,
+        config: VolcanoConfig,
+        avgDistance: Int
     ) = generateSet(initialSet, 0, maxDepth, mutableListOf(), listOf(), config, avgDistance)
-
 
     private fun generateSet(
         currentSet: Set<String>,
@@ -172,7 +170,7 @@ class Volcano : Puzzle(16) {
         acc: MutableList<List<String>>,
         currentCombo: List<String>,
         config: VolcanoConfig,
-        avgDistance: Int,
+        avgDistance: Int
     ): List<List<String>> {
         if (currentDepth == maxDepth) {
             acc.add(currentCombo)
@@ -194,8 +192,7 @@ class Volcano : Puzzle(16) {
         return acc
     }
 
-    private fun calculatePointsForRoute(config: VolcanoConfig, route: List<String>
-    ): Int {
+    private fun calculatePointsForRoute(config: VolcanoConfig, route: List<String>): Int {
         var currentCave = config.startingCave
         var accumulatedRoutePoints = 0
         var currentMinute = 0
