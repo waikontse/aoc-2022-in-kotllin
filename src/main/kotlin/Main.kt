@@ -1,8 +1,7 @@
-import week2.RegolithReservoir
-import week3.Volcano
+import week3.PyroFlow
 
 fun main() {
-    val puzzle = Volcano()
+    val puzzle = PyroFlow()
     println(puzzle.solveFirstPart())
-//    println(puzzle.solveSecondPart())
+    println(puzzle.solveSecondPart())
 }
