@@ -121,5 +121,7 @@ class PyroFlow : Puzzle(17) {
 }
 
 data class BlockConfig(
-
+    val leftMost: Int,
+    val rightMost: Int,
+    val currentRow: Int
 )
