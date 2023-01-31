@@ -1,7 +1,6 @@
 package week3
 
 import shared.Puzzle
-import week3.PyroFlow.Tunnel
 
 class PyroFlow : Puzzle(17) {
     companion object {
@@ -51,15 +50,11 @@ class PyroFlow : Puzzle(17) {
     data class Tunnel(val hotGasConfig: String, val width: Int) {
         val tunnel: MutableList<CharArray>
         init {
-            tunnel = MutableList(1) { _ -> CharArray(7) }
+            tunnel = MutableList(1) { _ -> CharArray(7) { BLANK } }
         }
 
         fun dropBlock(block: Block, blockNumber: Int = 0) {
-            // Extend the tunnel with 3 high
-            tunnel += `3_EMPTY_ROWS`
-
-            // Add the block to the tunnel starting position
-            tunnel += block.config
+            prepareTunnelForNewBlock(block)
 
             // Get the config for the flow
             getNextJetFlows(blockNumber)
@@ -67,9 +62,40 @@ class PyroFlow : Puzzle(17) {
             // try to drop the block as much as possible
         }
 
+        private fun prepareTunnelForNewBlock(block: Block) {
+            // Extend the tunnel with 3 high
+            tunnel += `3_EMPTY_ROWS`
+
+            // Add the block to the tunnel starting position
+            tunnel += block.config
+        }
+
+        fun canDrop(block: Block, lowestRow: Int): Boolean {
+            return false
+        }
+
+        fun canShiftLeft(block: BlockConfig): Boolean {
+            return false
+        }
+
+        fun canShiftRight(block: BlockConfig): Boolean {
+
+        }
+
+        fun shiftLeft(block: BlockConfig) {
+
+        }
+
+        fun shiftRight(config: BlockConfig) {
+
+        }
+
         fun getNextJetFlows(blockNumber: Int): List<Char> =
             (blockNumber.times(5)until blockNumber.plus(1).times(5))
                 .map { hotGasConfig[it%hotGasConfig.length] }
+
+        fun printTunnel() =
+            tunnel.forEach { println(it.joinToString(separator = "")) }
     }
 
 
@@ -84,6 +110,8 @@ class PyroFlow : Puzzle(17) {
             println("$i: ${tunnel.getNextJetFlows(i)}")
         }
 
+        tunnel.printTunnel()
+
         return 0
     }
 
@@ -91,3 +119,7 @@ class PyroFlow : Puzzle(17) {
         TODO("Not yet implemented")
     }
 }
+
+data class BlockConfig(
+
+)
